@@ -1,1 +1,1 @@
-CBA app with input+output table, Chart.js plots, and Excel export.
+Final version of the CBA tool with input + output Excel export, and embedded ISGAN logo.
