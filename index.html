@@ -81,19 +81,32 @@ document.getElementById("calcForm").addEventListener("submit", async function(e)
       return row.includes(`<td>${maxNPV}</td>`) ? row.replace('<tr>', '<tr style="font-weight:bold">') : row;
     });
     
-    document.getElementById("results").innerHTML = html;
+    // Crea dinamicamente la tabella
+    const table = document.createElement("table");
+    table.className = "table table-bordered results-table";
+    const thead = document.createElement("thead");
+    thead.innerHTML = "<tr><th>Name</th><th>CAPEX</th><th>OPEX</th><th>Benefits</th><th>Years</th><th>Rate</th><th>NPV</th><th>IRR</th><th>CBR</th></tr>";
+    table.appendChild(thead);
 
-    // Evidenzia NPV max in grassetto, IRR = N/A in rosso
-    const rows = document.querySelectorAll(".results-table tbody tr");
-    const npvValues = Array.from(rows).map(row => parseFloat(row.children[6].innerText));
-    const maxNPV = Math.max(...npvValues.filter(v => !isNaN(v)));
-    rows.forEach(row => {
-      const irr = row.children[7].innerText;
-      const npv = parseFloat(row.children[6].innerText);
-      if (irr === "N/A") row.classList.add("table-danger");
-      if (npv === maxNPV) row.classList.add("fw-bold");
+    const tbody = document.createElement("tbody");
+    let maxNPV = Math.max(...res.data.map(r => r.npv !== "N/A" ? r.npv : -Infinity));
+
+    res.data.forEach(r => {
+      const tr = document.createElement("tr");
+      if (r.irr === "N/A") tr.classList.add("table-danger");
+      if (r.npv === maxNPV) tr.classList.add("fw-bold");
+      tr.innerHTML = `
+        <td>${r.name}</td><td>${r.capex}</td><td>${r.opex}</td><td>${r.benefits}</td>
+        <td>${r.years}</td><td>${r.rate}</td><td>${r.npv}</td><td>${r.irr}</td><td>${r.cbr}</td>`;
+      tbody.appendChild(tr);
     });
 
+    table.appendChild(tbody);
+    const resultsDiv = document.getElementById("results");
+    resultsDiv.innerHTML = "";
+    resultsDiv.appendChild(table);
+
+    // Chart rendering
     new Chart(document.getElementById("npvChart"), {
       type: 'bar',
       data: {
