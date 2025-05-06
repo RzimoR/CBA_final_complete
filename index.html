@@ -24,7 +24,11 @@
         <tr><td><input type='text' id='name1' value='A.1' class='form-control'></td><td><input type='number' id='capex1' class='form-control'></td><td><input type='number' id='opex1' class='form-control'></td><td><input type='number' id='benefits1' class='form-control'></td><td><input type='number' id='years1' class='form-control'></td><td><input type='number' id='rate1' class='form-control'></td></tr><tr><td><input type='text' id='name2' value='A.2' class='form-control'></td><td><input type='number' id='capex2' class='form-control'></td><td><input type='number' id='opex2' class='form-control'></td><td><input type='number' id='benefits2' class='form-control'></td><td><input type='number' id='years2' class='form-control'></td><td><input type='number' id='rate2' class='form-control'></td></tr><tr><td><input type='text' id='name3' value='A.3' class='form-control'></td><td><input type='number' id='capex3' class='form-control'></td><td><input type='number' id='opex3' class='form-control'></td><td><input type='number' id='benefits3' class='form-control'></td><td><input type='number' id='years3' class='form-control'></td><td><input type='number' id='rate3' class='form-control'></td></tr><tr><td><input type='text' id='name4' value='A.4' class='form-control'></td><td><input type='number' id='capex4' class='form-control'></td><td><input type='number' id='opex4' class='form-control'></td><td><input type='number' id='benefits4' class='form-control'></td><td><input type='number' id='years4' class='form-control'></td><td><input type='number' id='rate4' class='form-control'></td></tr><tr><td><input type='text' id='name5' value='A.5' class='form-control'></td><td><input type='number' id='capex5' class='form-control'></td><td><input type='number' id='opex5' class='form-control'></td><td><input type='number' id='benefits5' class='form-control'></td><td><input type='number' id='years5' class='form-control'></td><td><input type='number' id='rate5' class='form-control'></td></tr><tr><td><input type='text' id='name6' value='A.6' class='form-control'></td><td><input type='number' id='capex6' class='form-control'></td><td><input type='number' id='opex6' class='form-control'></td><td><input type='number' id='benefits6' class='form-control'></td><td><input type='number' id='years6' class='form-control'></td><td><input type='number' id='rate6' class='form-control'></td></tr>
       </tbody>
     </table>
-    <button type="submit" class="btn btn-primary">Calculate CBA</button>
+    
+<button type="submit" class="btn btn-primary">Calculate CBA</button>
+<button type="button" class="btn btn-secondary ms-2" onclick="resetCBA()">Reset CBA</button>
+<a href="https://smartgrideval.unica.it/main_cba/" class="btn btn-outline-dark ms-2">Back to Smartgrideval</a>
+
   </form>
 
   
@@ -115,6 +119,31 @@ function downloadExcel() {
   const table = document.querySelector(".results-table");
   const wb = XLSX.utils.table_to_book(table, { sheet: "CBA Results" });
   XLSX.writeFile(wb, "CBA results.xlsx");
+}
+
+function resetCBA() {
+  for (let i = 1; i <= 6; i++) {
+    document.getElementById(`name${i}`).value = `A.${i}`;
+    document.getElementById(`capex${i}`).value = "";
+    document.getElementById(`opex${i}`).value = "";
+    document.getElementById(`benefits${i}`).value = "";
+    document.getElementById(`years${i}`).value = "";
+    document.getElementById(`rate${i}`).value = "";
+  }
+  document.getElementById("results").innerHTML = "";
+  document.getElementById("npvChart").remove();
+  document.getElementById("irrChart").remove();
+  document.getElementById("cbrChart").remove();
+  const canvases = `
+    <canvas id="npvChart"></canvas>
+    <canvas id="irrChart"></canvas>
+    <canvas id="cbrChart"></canvas>`;
+  const row = document.createElement("div");
+  row.className = "row mt-4";
+  row.innerHTML = `<div class="col-md-4">${canvases.split('</canvas>')[0]}</canvas></div>
+                   <div class="col-md-4">${canvases.split('</canvas>')[1]}</canvas></div>
+                   <div class="col-md-4">${canvases.split('</canvas>')[2]}</canvas></div>`;
+  document.body.appendChild(row);
 }
 </script>
 </body>
