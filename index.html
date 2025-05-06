@@ -80,7 +80,50 @@ document.getElementById("calcForm").addEventListener("submit", async function(e)
     html = html.replace(/<tr>(.*?)<\/tr>/g, (row) => {
       return row.includes(`<td>${maxNPV}</td>`) ? row.replace('<tr>', '<tr style="font-weight:bold">') : row;
     });
+    
+    const maxNPV = Math.max(...res.data.map(r => r.npv !== "N/A" ? r.npv : -Infinity));
+    html = "<table class='table table-bordered results-table'><thead><tr>" +
+      "<th>Name</th><th>CAPEX</th><th>OPEX</th><th>Benefits</th><th>Years</th><th>Rate</th>" +
+      "<th>NPV</th><th>IRR</th><th>CBR</th></tr></thead><tbody>";
+
+    res.data.forEach(r => {
+      let rowClass = "";
+      if (r.irr === "N/A") rowClass = "table-danger";
+      else if (r.npv === maxNPV) rowClass = "fw-bold";
+      html += `<tr class="${rowClass}"><td>${r.name}</td><td>${r.capex}</td><td>${r.opex}</td>` +
+              `<td>${r.benefits}</td><td>${r.years}</td><td>${r.rate}</td>` +
+              `<td>${r.npv}</td><td>${r.irr}</td><td>${r.cbr}</td></tr>`;
+    });
+    html += "</tbody></table>";
     document.getElementById("results").innerHTML = html;
+
+    const labels = res.data.map(r => r.name);
+    const npvs = res.data.map(r => r.npv !== "N/A" ? r.npv : 0);
+    const irrs = res.data.map(r => r.irr !== "N/A" ? r.irr : 0);
+    const cbrs = res.data.map(r => r.cbr !== "N/A" ? r.cbr : 0);
+
+    new Chart(document.getElementById("npvChart"), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{ label: "NPV", data: npvs }]
+      }
+    });
+    new Chart(document.getElementById("irrChart"), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{ label: "IRR", data: irrs }]
+      }
+    });
+    new Chart(document.getElementById("cbrChart"), {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{ label: "CB Ratio", data: cbrs }]
+      }
+    });
+    
 
     const labels = res.data.map(r => r.name);
     const npvs = res.data.map(r => r.npv);
