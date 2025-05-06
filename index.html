@@ -60,21 +60,47 @@ document.getElementById("calcForm").addEventListener("submit", async function(e)
     latestResults = res.data;
     
     let maxNPV = Math.max(...res.data.map(r => r.npv));
-    let html = `
+    
+    let maxNPV = Math.max(...res.data.map(r => r.npv));
+    let tableHTML = `
       <table class='table table-bordered results-table'>
         <thead><tr>
           <th>Name</th><th>CAPEX</th><th>OPEX</th><th>Benefits</th><th>Years</th><th>Rate</th>
           <th>NPV</th><th>IRR</th><th>CBR</th>
         </tr></thead><tbody>`;
     res.data.forEach(r => {
-      const bold = r.npv === maxNPV ? "font-weight-bold" : "";
-      html += `<tr class="${bold}">
+      const bold = r.npv === maxNPV ? "fw-bold" : "";
+      tableHTML += `<tr class="${bold}">
         <td>${r.name}</td><td>${r.capex}</td><td>${r.opex}</td><td>${r.benefits}</td>
         <td>${r.years}</td><td>${r.rate}</td><td>${r.npv}</td><td>${r.irr}</td><td>${r.cbr}</td>
       </tr>`;
     });
-    html += "</tbody></table>";
-    document.getElementById("results").innerHTML = html;
+    tableHTML += "</tbody></table>";
+    document.getElementById("results").innerHTML = tableHTML;
+
+    const labels = res.data.map(r => r.name);
+    const npvs = res.data.map(r => r.npv);
+    const irrs = res.data.map(r => r.irr);
+    const cbrs = res.data.map(r => r.cbr);
+
+    new Chart(document.getElementById("chartNPV"), {
+      type: 'bar',
+      data: { labels: labels, datasets: [{{ label: 'NPV', data: npvs }}] },
+      options: {{ responsive: true }}
+    });
+    new Chart(document.getElementById("chartIRR"), {
+      type: 'bar',
+      data: { labels: labels, datasets: [{{ label: 'IRR', data: irrs }}] },
+      options: {{ responsive: true }}
+    });
+    new Chart(document.getElementById("chartCBR"), {
+      type: 'bar',
+      data: { labels: labels, datasets: [{{ label: 'CB Ratio', data: cbrs }}] },
+      options: {{ responsive: true }}
+    });
+
+    latestResults = res.data;
+
 
     const labels = res.data.map(r => r.name);
     const npvs = res.data.map(r => r.npv);
