@@ -2,6 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <meta charset="UTF-8">
   <title>CBA Tool</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -27,6 +28,14 @@
   </form>
 
   <div id="results" class="mt-5"></div>
+<div class="mt-5">
+  <h5>NPV per Alternative</h5>
+  <canvas id="chartNPV" height="100"></canvas>
+  <h5 class="mt-4">IRR per Alternative</h5>
+  <canvas id="chartIRR" height="100"></canvas>
+  <h5 class="mt-4">CBR per Alternative</h5>
+  <canvas id="chartCBR" height="100"></canvas>
+</div>
   <button class="btn btn-success mt-3" onclick="downloadExcel()">Download Excel</button>
 
 <script>
@@ -49,6 +58,8 @@ document.getElementById("calcForm").addEventListener("submit", async function(e)
   try {
     const res = await axios.post("/calculate", data);
     latestResults = res.data;
+    
+    let maxNPV = Math.max(...res.data.map(r => r.npv));
     let html = `
       <table class='table table-bordered results-table'>
         <thead><tr>
@@ -56,13 +67,36 @@ document.getElementById("calcForm").addEventListener("submit", async function(e)
           <th>NPV</th><th>IRR</th><th>CBR</th>
         </tr></thead><tbody>`;
     res.data.forEach(r => {
-      html += `<tr>
+      const bold = r.npv === maxNPV ? "font-weight-bold" : "";
+      html += `<tr class="${bold}">
         <td>${r.name}</td><td>${r.capex}</td><td>${r.opex}</td><td>${r.benefits}</td>
         <td>${r.years}</td><td>${r.rate}</td><td>${r.npv}</td><td>${r.irr}</td><td>${r.cbr}</td>
       </tr>`;
     });
     html += "</tbody></table>";
     document.getElementById("results").innerHTML = html;
+
+    const labels = res.data.map(r => r.name);
+    const npvs = res.data.map(r => r.npv);
+    const irrs = res.data.map(r => r.irr);
+    const cbrs = res.data.map(r => r.cbr);
+
+    new Chart(document.getElementById("chartNPV"), {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'NPV', data: npvs }] },
+      options: {{ responsive: true }}
+    });
+    new Chart(document.getElementById("chartIRR"), {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'IRR', data: irrs }] },
+      options: {{ responsive: true }}
+    });
+    new Chart(document.getElementById("chartCBR"), {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'CB Ratio', data: cbrs }] },
+      options: {{ responsive: true }}
+    });
+
   } catch(err) {
     document.getElementById("results").innerHTML = "<p class='text-danger'>Error in calculation.</p>";
   }
